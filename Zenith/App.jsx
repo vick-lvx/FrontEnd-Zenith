@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -6,14 +7,15 @@ import Login from './Src/Screens/Login';
 import VerificacaoEmail from './Src/Screens/ResetSenha';
 import Cadastro from './Src/Screens/Cadastro';
 import Route from './Src/Routes/Route';
-import CadastroGastos from './Src/Screens/CadastroGastos';
-import CadastroGanhos from './Src/Screens/CadastroGanhos';
+import CadastroGastosVariaveis from './Src/Screens/CadastroGastosVariaveis';
+import CadastroGastosFixosV from './Src/Screens/CadastroGastosFixosV';
+import CadastroGanhosFixos from './Src/Screens/CadastroGanhosFixos';
+import CadastroGanhosVariaveis from './Src/Screens/CadastroGanhosVariaveis';
 import CadastroInvestimentos from './Src/Screens/CadastroInvestimentos';
 import CadastroReservaEmergencia from './Src/Screens/CadastroReservaEmergencia';
 import { createAsyncStorage } from "@react-native-async-storage/async-storage";
 import Home from './Src/Screens/Home';
-const Stack = createNativeStackNavigator();
-const storage = createAsyncStorage('Zenith');
+
 export default function Navigation() {
 
   const [token, setToken] = useState(null);
@@ -33,16 +35,17 @@ export default function Navigation() {
   }, []);
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-        <Stack.Screen name="VerificacaoEmail" component={VerificacaoEmail} options={{ headerShown: false }} />
-        <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
-        <Stack.Screen name="Cadastro" component={Cadastro} options={{ headerShown: false }} />
-        <Stack.Screen name="Route" component={Route} options={{ headerShown: false }} />
-        <Stack.Screen name="CadastroGastos" component={CadastroGastos} options={{ headerShown: false }} />
-        <Stack.Screen name="CadastroGanhos" component={CadastroGanhos} options={{ headerShown: false }} />
-        <Stack.Screen name="CadastroInvestimentos" component={CadastroInvestimentos} options={{ headerShown: false }} />
-        <Stack.Screen name="CadastroReservaEmergencia" component={CadastroReservaEmergencia} options={{ headerShown: false }} />
+      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="VerificacaoEmail" component={VerificacaoEmail} />
+        <Stack.Screen name="Cadastro" component={Cadastro} />
+        <Stack.Screen name="Route" component={Route} />
+        <Stack.Screen name="CadastroGastosVariaveis" component={CadastroGastosVariaveis} />
+        <Stack.Screen name="CadastroGanhosFixos" component={CadastroGanhosFixos} />
+        <Stack.Screen name="CadastroGanhosVariaveis" component={CadastroGanhosVariaveis} />
+        <Stack.Screen name="CadastroInvestimentos" component={CadastroInvestimentos} />
+        <Stack.Screen name="CadastroReservaEmergencia" component={CadastroReservaEmergencia} />
+        <Stack.Screen name="CadastroGastosFixosV" component={CadastroGastosFixosV} />
       </Stack.Navigator>
     </NavigationContainer>
   );
