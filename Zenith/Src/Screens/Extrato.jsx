@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import {
-    View, Text, StyleSheet, ImageBackground, ScrollView, Pressable,
+    View, Text, StyleSheet, ScrollView, Pressable,
     ActivityIndicator, Alert, Modal, TextInput
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+
+
 
 const API = 'http://10.0.2.2:3001';
 
@@ -25,6 +27,57 @@ const CATEGORIAS = {
     ]
 };
 
+
+const TELAS_EDICAO = {
+    'gasto-fixo': 'AtualizarGastosFixos',
+    'gasto-variado': 'AtualizarGastosVariaveis',
+    'ganho-fixo': 'AtualizarGanhosFixos',
+    'ganho-variado': 'AtualizarGanhosVariados',
+    investimento: 'AtualizarInvestimentos',
+    reserva: 'AtualizarReservaEmergencia'
+};
+
+
+const ROTAS_EXCLUSAO = {
+    'gasto-fixo': '/api/deletar-gastos/',
+    'gasto-variado': '/api/deletar-gastos/',
+    parcela: '/api/deletar-parcelas/',
+    'ganho-fixo': '/api/deletar-ganhos/',
+    'ganho-variado': '/api/deletar-ganhos/',
+    investimento: '/api/deletar-investimentos/',
+    reserva: '/api/deletar-reserva/'
+};
+
+
+const ROTAS_SITUACAO = {
+    'gasto-fixo': '/api/atualizar-situacao-gastos/',
+    'gasto-variado': '/api/atualizar-situacao-gastos/',
+    parcela: '/api/atualizar-situacao-parcelas/',
+    'ganho-fixo': '/api/atualizar-situacao-ganhos/',
+    'ganho-variado': '/api/atualizar-situacao-ganhos/',
+    investimento: '/api/atualizar-situacao-investimentos/',
+    reserva: '/api/atualizar-situacao-reserva/'
+};
+
+
+const BOTOES_CADASTRO = {
+    gastos: [
+        { estilo: 'blue', titulo: 'Gasto variado', tela: 'CadastroGastosVariaveis' },
+        { estilo: 'purple', titulo: 'Parcelado', tela: 'CadastroGastosParcelados' }
+    ],
+    ganhos: [
+        { estilo: 'blue', titulo: 'Ganho fixo', tela: 'CadastroGanhosFixos' },
+        { estilo: 'purple', titulo: 'Ganho variado', tela: 'CadastroGanhosVariaveis' }
+    ],
+    investimentos: [
+        { estilo: 'blue', titulo: 'Investimento', tela: 'CadastroInvestimentos' },
+        { estilo: 'purple', titulo: 'Reserva', tela: 'CadastroReservaEmergencia' }
+    ]
+};
+
+const SITUACOES_CONCLUIDAS = ['P', 'PAGO', 'RECEBIDO'];
+
+
 const pegarId = (item) => item.ID_EXTRATO ?? item.id_extrato ?? item.ID ?? item.id ?? null;
 
 const formatarValor = (valor) => {
@@ -42,7 +95,24 @@ const formatarData = (data) => {
     return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : texto;
 };
 
+const validarData = (dataInformada) => {
+    const partes = dataInformada.trim().split('/');
+    return (
+        partes.length === 3 &&
+        partes[0].length === 2 && partes[1].length === 2 && partes[2].length === 4 &&
+        Number(partes[0]) >= 1 && Number(partes[0]) <= 31 &&
+        Number(partes[1]) >= 1 && Number(partes[1]) <= 12
+    );
+};
+
+const paraISO = (dataInformada) => {
+    const [dia, mes, ano] = dataInformada.trim().split('/');
+    return `${ano}-${mes}-${dia}`;
+};
+
+
 export default function Extrato({ navigation }) {
+   
     const [aba, setAba] = useState('gastos');
     const [registros, setRegistros] = useState({});
     const [abertas, setAbertas] = useState({});
@@ -52,6 +122,8 @@ export default function Extrato({ navigation }) {
     const [modalVisivel, setModalVisivel] = useState(false);
     const [dataInformada, setDataInformada] = useState('');
     const [acao, setAcao] = useState(null);
+
+    const configAuth = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
     const carregarExtrato = async () => {
         try {
@@ -67,9 +139,9 @@ export default function Extrato({ navigation }) {
             setUsuarioId(id);
             setToken(tokenSalvo);
             const config = tokenSalvo ? { headers: { Authorization: `Bearer ${tokenSalvo}` } } : {};
-            const chaves = Object.values(CATEGORIAS).flat();
+            const categorias = Object.values(CATEGORIAS).flat();
 
-            const respostas = await Promise.all(chaves.map(async (categoria) => {
+            const respostas = await Promise.all(categorias.map(async (categoria) => {
                 try {
                     const resposta = await axios.get(`${API}${categoria.rota}/${id}`, config);
                     return [categoria.chave, Array.isArray(resposta.data) ? resposta.data : []];
@@ -93,24 +165,14 @@ export default function Extrato({ navigation }) {
         }, [])
     );
 
+    
     const abrirCategoria = (chave) => {
         setAbertas((estado) => ({ ...estado, [chave]: !estado[chave] }));
     };
 
     const excluirRegistro = async (categoria, id) => {
-        const rotas = {
-            'gasto-fixo': '/api/deletar-gastos/',
-            'gasto-variado': '/api/deletar-gastos/',
-            parcela: '/api/deletar-parcelas/',
-            'ganho-fixo': '/api/deletar-ganhos/',
-            'ganho-variado': '/api/deletar-ganhos/',
-            investimento: '/api/deletar-investimentos/',
-            reserva: '/api/deletar-reserva/'
-        };
-
         try {
-            const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-            await axios.delete(`${API}${rotas[categoria.tipo]}${id}`, config);
+            await axios.delete(`${API}${ROTAS_EXCLUSAO[categoria.tipo]}${id}`, configAuth);
             Alert.alert('Registro excluído', 'O extrato foi atualizado.');
             carregarExtrato();
         } catch {
@@ -118,28 +180,8 @@ export default function Extrato({ navigation }) {
         }
     };
 
-  const iniciarAcao = (tipoAcao, categoria, item) => {
-    const id = pegarId(item);
-
-    if (!id) {
-        Alert.alert(
-            'Identificador não encontrado',
-            'Este registro não possui um identificador disponível. Não é possível continuar com segurança.'
-        );
-        return;
-    }
-
-    if (tipoAcao === 'editar') {
-        const telas = {
-            'gasto-fixo': 'AtualizarGastosFixos',
-            'gasto-variado': 'AtualizarGastosVariaveis',
-            'ganho-fixo': 'AtualizarGanhosFixos',
-            'ganho-variado': 'AtualizarGanhosVariaveis',
-            investimento: 'AtualizarInvestimentos',
-            reserva: 'AtualizarReservaEmergencia'
-        };
-
-        const tela = telas[categoria.tipo];
+    const editarRegistro = (categoria, item) => {
+        const tela = TELAS_EDICAO[categoria.tipo];
 
         if (!tela) {
             Alert.alert('Indisponível', 'A edição desta categoria ainda não está disponível.');
@@ -147,67 +189,45 @@ export default function Extrato({ navigation }) {
         }
 
         navigation.navigate(tela, { registro: item });
-        return;
-    }
+    };
 
-    if (tipoAcao === 'excluir') {
-        Alert.alert('Excluir registro', 'Deseja realmente excluir este registro?', [
-            { text: 'Cancelar', style: 'cancel' },
-            { text: 'Excluir', style: 'destructive', onPress: () => excluirRegistro(categoria, id) }
-        ]);
-        return;
-    }
+    const iniciarAcao = (tipoAcao, categoria, item) => {
+        const id = pegarId(item);
 
-    setAcao({ tipoAcao, categoria, id });
-    setDataInformada('');
-    setModalVisivel(true);
-};
-    const confirmarData = () => {
-        const partes = dataInformada.trim().split('/');
-
-        if (
-            partes.length !== 3 || partes[0].length !== 2 ||
-            partes[1].length !== 2 || partes[2].length !== 4 ||
-            Number(partes[0]) < 1 || Number(partes[0]) > 31 ||
-            Number(partes[1]) < 1 || Number(partes[1]) > 12
-        ) {
-            Alert.alert('Data inválida', 'Informe a data no formato DD/MM/AAAA.');
+        if (!id) {
+            Alert.alert(
+                'Identificador não encontrado',
+                'Este registro não possui um identificador disponível. Não é possível continuar com segurança.'
+            );
             return;
         }
 
-        const dataISO = `${partes[2]}-${partes[1]}-${partes[0]}`;
-        const recebimento = acao?.tipoAcao === 'receber';
+        if (tipoAcao === 'editar') {
+            editarRegistro(categoria, item);
+            return;
+        }
 
-        Alert.alert(
-            'Confirmar',
-            `Deseja confirmar o ${recebimento ? 'recebimento' : 'pagamento'} em ${dataInformada}?`,
-            [
-                { text: 'Voltar', style: 'cancel' },
-                { text: 'Confirmar', onPress: () => atualizarSituacao(dataISO) }
-            ]
-        );
+        if (tipoAcao === 'excluir') {
+            Alert.alert('Excluir registro', 'Deseja realmente excluir este registro?', [
+                { text: 'Cancelar', style: 'cancel' },
+                { text: 'Excluir', style: 'destructive', onPress: () => excluirRegistro(categoria, id) }
+            ]);
+            return;
+        }
+
+        setAcao({ tipoAcao, categoria, id });
+        setDataInformada('');
+        setModalVisivel(true);
     };
 
     const atualizarSituacao = async (dataISO) => {
         if (!acao) return;
 
-        const rotas = {
-            'gasto-fixo': '/api/atualizar-situacao-gastos/',
-            'gasto-variado': '/api/atualizar-situacao-gastos/',
-            parcela: '/api/atualizar-situacao-parcelas/',
-            'ganho-fixo': '/api/atualizar-situacao-ganhos/',
-            'ganho-variado': '/api/atualizar-situacao-ganhos/',
-            investimento: '/api/atualizar-situacao-investimentos/',
-            reserva: '/api/atualizar-situacao-reserva/'
-        };
-
         try {
-            const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-
             await axios.put(
-                `${API}${rotas[acao.categoria.tipo]}${acao.id}`,
+                `${API}${ROTAS_SITUACAO[acao.categoria.tipo]}${acao.id}`,
                 { DATA_PAGO: dataISO, USUARIO_ID: usuarioId },
-                config
+                configAuth
             );
 
             setModalVisivel(false);
@@ -219,11 +239,30 @@ export default function Extrato({ navigation }) {
         }
     };
 
+    const confirmarData = () => {
+        if (!validarData(dataInformada)) {
+            Alert.alert('Data inválida', 'Informe a data no formato DD/MM/AAAA.');
+            return;
+        }
+
+        const recebimento = acao?.tipoAcao === 'receber';
+
+        Alert.alert(
+            'Confirmar',
+            `Deseja confirmar o ${recebimento ? 'recebimento' : 'pagamento'} em ${dataInformada}?`,
+            [
+                { text: 'Voltar', style: 'cancel' },
+                { text: 'Confirmar', onPress: () => atualizarSituacao(paraISO(dataInformada)) }
+            ]
+        );
+    };
+
+  
     const renderRegistro = (item, categoria, indice) => {
         const nome = item.NOME_REAL || item.NOME || item.nome || 'Registro financeiro';
         const valor = item.VALOR_REAL ?? item.VALOR ?? item.valor ?? 0;
         const situacao = String(item.SITUACAO || '').toUpperCase();
-        const concluido = ['P', 'PAGO', 'RECEBIDO'].includes(situacao);
+        const concluido = SITUACOES_CONCLUIDAS.includes(situacao);
         const ganho = categoria.tipo.startsWith('ganho');
         const data = concluido ? formatarData(item.DATA_PAGO) : '';
         const id = pegarId(item);
@@ -237,42 +276,50 @@ export default function Extrato({ navigation }) {
                             <Text style={styles.descricao}>{item.DESCRICAO_REAL || item.DESCRICAO}</Text>
                         )}
                     </View>
-                    <Text style={[styles.valor, { color: ganho ? '#7FE0A1' : '#FF8297' }]}>
-                        {formatarValor(valor)}
+                    <Text style={[styles.valor, { color: ganho ? '#2ED47A' : '#FF5B7F' }]}>
+                        {ganho ? '+' : '-'}{formatarValor(valor)}
                     </Text>
                 </View>
 
                 {!!item.MES_ANO && <Text style={styles.detalhe}>Mês: {item.MES_ANO}</Text>}
+
                 {categoria.tipo === 'parcela' && item.PARCELA_ATUAL != null && (
-                    <Text style={styles.detalhe}>Parcela {item.PARCELA_ATUAL} de {item.TOTAL_PARCELAS}</Text>
+                    <Text style={styles.detalhe}>
+                        Parcela {item.PARCELA_ATUAL} de {item.TOTAL_PARCELAS}
+                    </Text>
                 )}
+
                 {categoria.tipo === 'parcela' && item.DIA_VENCIMENTO != null && (
                     <Text style={styles.detalhe}>Vencimento: dia {item.DIA_VENCIMENTO}</Text>
                 )}
+
                 {(categoria.tipo === 'investimento' || categoria.tipo === 'reserva') && item.VALOR_GUARDADO != null && (
-                    <Text style={styles.detalhe}>Valor acumulado: {formatarValor(item.VALOR_GUARDADO)}</Text>
+                    <Text style={styles.detalhe}>Guardado: {formatarValor(item.VALOR_GUARDADO)}</Text>
                 )}
+
                 {categoria.tipo === 'investimento' && item.DIA_APLICACAO != null && (
-                    <Text style={styles.detalhe}>Dia da aplicação: {item.DIA_APLICACAO}</Text>
+                    <Text style={styles.detalhe}>Aplicação: dia {item.DIA_APLICACAO}</Text>
                 )}
 
                 <View style={styles.rodapeRegistro}>
                     <View style={[styles.status, concluido ? styles.statusPago : styles.statusPendente]}>
                         <Text style={[styles.textoStatus, concluido ? styles.textoPago : styles.textoPendente]}>
-                            {concluido ? `Concluído${data ? ` • ${data}` : ''}` : 'Pendente'}
+                            {concluido ? (data ? `Pago ${data}` : 'Pago') : 'Pendente'}
                         </Text>
                     </View>
 
-                    {!concluido && (
-                        <View style={styles.acoes}>
+                    <View style={styles.acoes}>
+                        {!concluido && (
                             <Pressable style={styles.botaoEditar} onPress={() => iniciarAcao('editar', categoria, item)}>
                                 <Text style={styles.textoEditar}>Editar</Text>
                             </Pressable>
+                        )}
+                        {!concluido && (
                             <Pressable style={styles.botaoExcluir} onPress={() => iniciarAcao('excluir', categoria, item)}>
                                 <Text style={styles.textoExcluir}>Excluir</Text>
                             </Pressable>
-                        </View>
-                    )}
+                        )}
+                    </View>
                 </View>
 
                 {!concluido && (
@@ -280,7 +327,9 @@ export default function Extrato({ navigation }) {
                         style={[styles.botaoConcluir, ganho && styles.botaoReceber]}
                         onPress={() => iniciarAcao(ganho ? 'receber' : 'pagar', categoria, item)}
                     >
-                        <Text style={styles.textoConcluir}>{ganho ? 'Marcar como recebido' : 'Marcar como pago'}</Text>
+                        <Text style={styles.textoConcluir}>
+                            {ganho ? 'Confirmar recebimento' : 'Confirmar pagamento'}
+                        </Text>
                     </Pressable>
                 )}
             </View>
@@ -295,74 +344,108 @@ export default function Extrato({ navigation }) {
             <View key={categoria.chave} style={styles.categoria}>
                 <Pressable style={styles.cabecalhoCategoria} onPress={() => abrirCategoria(categoria.chave)}>
                     <View>
-                        <Text style={styles.tituloCategoria}>{categoria.titulo}</Text>
-                        <Text style={styles.contagem}>{lista.length} {lista.length === 1 ? 'registro' : 'registros'}</Text>
+                        <Text style={[styles.tituloCategoria, aberta && styles.tituloCategoriaAberta]}>
+                            {categoria.titulo}
+                        </Text>
+                        <Text style={styles.contagem}>{lista.length} registro(s)</Text>
                     </View>
-                    <Text style={styles.seta}>{aberta ? '−' : '+'}</Text>
+                    <Text style={[styles.seta, aberta && styles.setaAberta]}>{aberta ? '▲' : '▼'}</Text>
                 </Pressable>
 
                 {aberta && (
                     <View style={styles.lista}>
-                        {lista.length ? lista.map((item, i) => renderRegistro(item, categoria, i)) :
-                            <Text style={styles.vazio}>Nenhum registro encontrado nesta categoria.</Text>}
+                        {lista.length
+                            ? lista.map((item, indice) => renderRegistro(item, categoria, indice))
+                            : <Text style={styles.vazio}>Nenhum registro nesta categoria.</Text>}
                     </View>
                 )}
             </View>
         );
     };
 
+   
     return (
-        <ImageBackground source={require('../../Res/img/FundoApp-Zenith.png')} style={styles.fundo} resizeMode="cover">
-            <View style={styles.overlay}>
+        <View style={styles.fundo}>
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.overlay}>
+                {/* CABEÇALHO DO APP */}
                 <View style={styles.cabecalho}>
                     <View>
                         <Text style={styles.titulo}>Extrato</Text>
-                        <Text style={styles.subtitulo}>Gerencie suas finanças</Text>
+                        <Text style={styles.subtitulo}>Resumo dos seus lançamentos financeiros</Text>
                     </View>
                     <Pressable style={styles.atualizar} onPress={carregarExtrato}>
-                        <Text style={styles.iconeAtualizar}>↻</Text>
+                        <Text style={styles.iconeAtualizar}>⟳</Text>
                     </Pressable>
                 </View>
 
-                <View style={styles.abas}>
-                    <Pressable style={[styles.aba, aba === 'gastos' && styles.abaGastos]} onPress={() => setAba('gastos')}>
-                        <Text style={[styles.textoAba, aba === 'gastos' && styles.textoAbaAtivo]}>Gastos</Text>
-                    </Pressable>
-                    <Pressable style={[styles.aba, aba === 'ganhos' && styles.abaGanhos]} onPress={() => setAba('ganhos')}>
-                        <Text style={[styles.textoAba, aba === 'ganhos' && styles.textoAbaAtivo]}>Ganhos</Text>
-                    </Pressable>
-                    <Pressable style={[styles.aba, aba === 'investimentos' && styles.abaInvestimentos]} onPress={() => setAba('investimentos')}>
-                        <Text style={[styles.textoAba, aba === 'investimentos' && styles.textoAbaAtivo]}>Invest./Emerg.</Text>
-                    </Pressable>
-                </View>
-
-                {carregando ? (
-                    <View style={styles.carregando}>
-                        <ActivityIndicator size="large" color="#8587FF" />
-                        <Text style={styles.textoCarregando}>Carregando extrato...</Text>
+             
+                <View style={styles.containerCentral}>
+                 
+                    <View style={styles.rowCentralHeader}>
+                        <Text style={styles.tituloCentral}>
+                            {aba === 'gastos' ? 'Meus gastos' : aba === 'ganhos' ? 'Meus ganhos' : 'Investimentos'}
+                        </Text>
+                        <View style={styles.botoesCadastroArea}>
+                            {(BOTOES_CADASTRO[aba] || []).map((botao) => (
+                                <Pressable
+                                    key={botao.tela}
+                                    style={botao.estilo === 'blue' ? styles.btnCadastroBlue : styles.btnCadastroPurple}
+                                    onPress={() => navigation.navigate(botao.tela)}
+                                >
+                                    <Text style={botao.estilo === 'blue' ? styles.txtCadastroBlue : styles.txtCadastroPurple}>
+                                        {botao.titulo}
+                                    </Text>
+                                </Pressable>
+                            ))}
+                        </View>
                     </View>
-                ) : (
-                    <ScrollView style={styles.scroll} contentContainerStyle={styles.conteudoScroll} showsVerticalScrollIndicator={false}>
-                        {(CATEGORIAS[aba] || []).map(renderCategoria)}
-                        <Text style={styles.rodape}>Zenith • Seu dinheiro, organizado.</Text>
-                    </ScrollView>
-                )}
-            </View>
+
+              
+                    <View style={styles.abas}>
+                        <Pressable style={[styles.aba, aba === 'gastos' && styles.abaAtiva]} onPress={() => setAba('gastos')}>
+                            <Text style={[styles.textoAba, aba === 'gastos' && styles.textoAbaAtivo]}>Gastos</Text>
+                        </Pressable>
+                        <Pressable style={[styles.aba, aba === 'ganhos' && styles.abaAtiva]} onPress={() => setAba('ganhos')}>
+                            <Text style={[styles.textoAba, aba === 'ganhos' && styles.textoAbaAtivo]}>Ganhos</Text>
+                        </Pressable>
+                        <Pressable style={[styles.aba, aba === 'investimentos' && styles.abaAtiva]} onPress={() => setAba('investimentos')}>
+                            <Text style={[styles.textoAba, aba === 'investimentos' && styles.textoAbaAtivo]}>Investimentos</Text>
+                        </Pressable>
+                    </View>
+
+              
+                    {carregando ? (
+                        <View style={styles.carregando}>
+                            <ActivityIndicator size="large" color="#3b82f6" />
+                            <Text style={styles.textoCarregando}>Carregando extrato...</Text>
+                        </View>
+                    ) : (
+                        <View style={styles.conteudoScroll}>
+                            {(CATEGORIAS[aba] || []).map(renderCategoria)}
+                            
+                        </View>
+                    )}
+                </View>
+            </ScrollView>
 
             <Modal visible={modalVisivel} transparent animationType="fade" onRequestClose={() => setModalVisivel(false)}>
                 <View style={styles.fundoModal}>
                     <View style={styles.modal}>
-                        <Text style={styles.tituloModal}>{acao?.tipoAcao === 'receber' ? 'Data do recebimento' : 'Data do pagamento'}</Text>
-                        <Text style={styles.subtituloModal}>Informe a data real no formato DD/MM/AAAA.</Text>
+                        <Text style={styles.tituloModal}>
+                            {acao?.tipoAcao === 'receber' ? 'Confirmar recebimento' : 'Confirmar pagamento'}
+                        </Text>
+                        <Text style={styles.subtituloModal}>Informe a data no formato DD/MM/AAAA.</Text>
+
                         <TextInput
                             style={styles.inputData}
+                            placeholder="DD/MM/AAAA"
+                            placeholderTextColor="#64748b"
                             value={dataInformada}
                             onChangeText={setDataInformada}
-                            placeholder="DD/MM/AAAA"
-                            placeholderTextColor="#7E89A6"
                             keyboardType="numeric"
                             maxLength={10}
                         />
+
                         <View style={styles.botoesModal}>
                             <Pressable style={styles.botaoCancelar} onPress={() => setModalVisivel(false)}>
                                 <Text style={styles.textoCancelar}>Cancelar</Text>
@@ -374,325 +457,117 @@ export default function Extrato({ navigation }) {
                     </View>
                 </View>
             </Modal>
-        </ImageBackground>
+        </View>
     );
 }
 
+
 const styles = StyleSheet.create({
-    fundo: {
-        flex: 1,
-        backgroundColor: '#0D1117'
+  
+    fundo: { flex: 1, 
+        backgroundColor: '#0d0f14' 
     },
-    overlay: {
-        flex: 1,
-        paddingTop: 54,
-        paddingHorizontal: 20,
-        backgroundColor: 'rgba(8, 13, 29, 0.72)'
+    overlay: { 
+    paddingTop: 48, 
+    paddingHorizontal: 16 
+},
+    scroll: { 
+        flex: 1 
     },
-    cabecalho: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 22
+    conteudoScroll: { 
+        paddingBottom: 16
+     },
+    cabecalho: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: 16, 
+        paddingHorizontal: 4 
     },
-    titulo: {
-        color: '#FFFFFF',
-        fontSize: 30,
-        fontWeight: '700'
+    titulo: { 
+        color: '#FFFFFF', 
+        fontSize: 26, 
+        fontWeight: '700' 
     },
-    subtitulo: {
-        color: '#AAB4D0',
-        fontSize: 14,
-        marginTop: 4
-    },
-    atualizar: {
-        width: 42,
-        height: 42,
-        borderRadius: 14,
-        backgroundColor: 'rgba(120,121,250,0.18)',
-        borderWidth: 1,
-        borderColor: 'rgba(140,145,255,0.35)',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    iconeAtualizar: {
-        color: '#B8BAFF',
-        fontSize: 28,
-        lineHeight: 31
-    },
-    abas: {
-        flexDirection: 'row',
-        backgroundColor: 'rgba(16,25,48,0.92)',
-        borderRadius: 16,
-        padding: 5,
-        marginBottom: 18,
-        borderWidth: 1,
-        borderColor: 'rgba(122,139,190,0.16)'
-    },
-    aba: {
-        flex: 1,
-        paddingVertical: 12,
-        paddingHorizontal: 4,
-        borderRadius: 12,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    abaGastos: {
-        backgroundColor: 'rgba(255,105,132,0.18)'
-    },
-    abaGanhos: {
-        backgroundColor: 'rgba(89,209,143,0.18)'
-    },
-    abaInvestimentos: {
-        backgroundColor: 'rgba(120,121,250,0.22)'
-    },
-    textoAba: {
-        color: '#8F9BB9',
-        fontSize: 12,
-        fontWeight: '600',
-        textAlign: 'center'
-    },
-    textoAbaAtivo: {
-        color: '#FFFFFF'
-    },
-    scroll: {
-        flex: 1
-    },
-    conteudoScroll: {
-        paddingBottom: 28
-    },
-    categoria: {
-        backgroundColor: 'rgba(16,26,50,0.92)',
-        borderRadius: 17,
-        borderWidth: 1,
-        borderColor: 'rgba(123,141,197,0.18)',
-        marginBottom: 12,
-        overflow: 'hidden'
-    },
-    cabecalhoCategoria: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 17,
-        paddingHorizontal: 17
-    },
-    tituloCategoria: {
-        color: '#F4F6FF',
-        fontSize: 15,
-        fontWeight: '600'
-    },
-    contagem: {
-        color: '#8794B6',
-        fontSize: 11,
-        marginTop: 5
-    },
-    seta: {
-        color: '#A7AAFF',
-        fontSize: 26,
-        marginLeft: 12
-    },
-    lista: {
-        paddingHorizontal: 12,
-        paddingBottom: 12
-    },
-    registro: {
-        backgroundColor: 'rgba(7,13,29,0.62)',
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: 'rgba(123,141,197,0.12)',
-        padding: 13,
-        marginTop: 9
-    },
-    linha: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start'
-    },
-    nomeArea: {
-        flex: 1,
-        paddingRight: 8
-    },
-    nome: {
-        color: '#F4F6FF',
-        fontSize: 14,
-        fontWeight: '600'
-    },
-    descricao: {
-        color: '#8794B6',
-        fontSize: 12,
-        marginTop: 5
-    },
-    valor: {
-        fontSize: 14,
-        fontWeight: '700'
-    },
-    detalhe: {
-        color: '#A0ABC6',
-        fontSize: 11,
-        marginTop: 6
-    },
-    rodapeRegistro: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        marginTop: 12,
-        gap: 8
-    },
-    status: {
-        borderRadius: 20,
-        paddingHorizontal: 9,
-        paddingVertical: 6
-    },
-    statusPendente: {
-        backgroundColor: 'rgba(174,151,103,0.12)'
-    },
-    statusPago: {
-        backgroundColor: 'rgba(91,210,143,0.12)'
-    },
-    textoStatus: {
-        fontSize: 10,
-        fontWeight: '600'
-    },
-    textoPendente: {
-        color: '#D4B36E'
-    },
-    textoPago: {
-        color: '#65D99B'
-    },
-    acoes: {
-        flexDirection: 'row',
-        gap: 7
-    },
-    botaoEditar: {
-        paddingHorizontal: 10,
-        paddingVertical: 7,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: 'rgba(137,145,255,0.35)'
-    },
-    textoEditar: {
-        color: '#B8BAFF',
-        fontSize: 11,
-        fontWeight: '600'
-    },
-    botaoExcluir: {
-        paddingHorizontal: 10,
-        paddingVertical: 7,
-        borderRadius: 8,
-        backgroundColor: 'rgba(255,105,132,0.1)',
-        borderWidth: 1,
-        borderColor: 'rgba(255,105,132,0.25)'
-    },
-    textoExcluir: {
-        color: '#FF8DA1',
-        fontSize: 11,
-        fontWeight: '600'
-    },
-    botaoConcluir: {
-        backgroundColor: 'rgba(255,105,132,0.12)',
-        borderColor: 'rgba(255,105,132,0.32)',
-        borderWidth: 1,
-        borderRadius: 10,
-        alignItems: 'center',
-        paddingVertical: 10,
-        marginTop: 12
-    },
-    botaoReceber: {
-        backgroundColor: 'rgba(91,210,143,0.12)',
-        borderColor: 'rgba(91,210,143,0.3)'
-    },
-    textoConcluir: {
-        color: '#F1F3FF',
-        fontSize: 12,
-        fontWeight: '600'
-    },
-    vazio: {
-        color: '#8995B3',
-        fontSize: 12,
-        textAlign: 'center',
-        paddingVertical: 18,
-        paddingHorizontal: 10
-    },
-    rodape: {
-        color: '#687594',
-        textAlign: 'center',
-        fontSize: 11,
-        marginTop: 12,
-        marginBottom: 12
-    },
-    carregando: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    textoCarregando: {
-        color: '#AAB4D0',
-        marginTop: 12,
-        fontSize: 13
-    },
-    fundoModal: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.72)',
-        justifyContent: 'center',
-        paddingHorizontal: 24
-    },
-    modal: {
-        backgroundColor: '#111B33',
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: 'rgba(137,145,255,0.3)',
-        padding: 20
-    },
-    tituloModal: {
-        color: '#FFFFFF',
-        fontSize: 19,
-        fontWeight: '700'
-    },
-    subtituloModal: {
-        color: '#AAB4D0',
-        fontSize: 12,
-        lineHeight: 18,
-        marginTop: 8,
-        marginBottom: 16
-    },
-    inputData: {
-        color: '#FFFFFF',
-        backgroundColor: '#0B1225',
-        borderRadius: 11,
-        borderWidth: 1,
-        borderColor: 'rgba(137,145,255,0.3)',
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        fontSize: 15
-    },
-    botoesModal: {
-        flexDirection: 'row',
-        gap: 10,
-        marginTop: 18
-    },
-    botaoCancelar: {
-        flex: 1,
-        paddingVertical: 12,
-        borderRadius: 10,
-        alignItems: 'center',
-        backgroundColor: 'rgba(133,146,177,0.12)'
-    },
-    textoCancelar: {
-        color: '#C3CBE0',
-        fontSize: 13,
-        fontWeight: '600'
-    },
-    botaoConfirmar: {
-        flex: 1,
-        paddingVertical: 12,
-        borderRadius: 10,
-        alignItems: 'center',
-        backgroundColor: '#696CF0'
-    },
-    textoConfirmar: {
-        color: '#FFFFFF',
-        fontSize: 13,
-        fontWeight: '700'
-    }
+    subtitulo: { 
+        color: '#9ba4b4', fontSize: 12, marginTop: 2 },
+    atualizar: { padding: 6 },
+    iconeAtualizar: { color: '#9ba4b4', fontSize: 22 },
+
+    
+    containerCentral: { flex: 1, backgroundColor: '#161a23', borderRadius: 20, borderWidth: 1, borderColor: '#242b3d', padding: 16 },
+    rowCentralHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+    tituloCentral: { fontSize: 16, fontWeight: '600', color: '#ffffff' },
+    botoesCadastroArea: { flexDirection: 'row', gap: 6 },
+
+   
+    btnCadastroBlue: { backgroundColor: '#242b3d', borderWidth: 1, borderColor: 'rgba(59, 130, 246, 0.2)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
+    txtCadastroBlue: { color: '#60a5fa', fontSize: 10, fontWeight: '600' },
+    btnCadastroPurple: { backgroundColor: '#211933', borderWidth: 1, borderColor: 'rgba(139, 92, 246, 0.2)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
+    txtCadastroPurple: { color: '#a78bfa', fontSize: 10, fontWeight: '600' },
+
+    abas: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#242b3d', marginBottom: 16 },
+    aba: { flex: 1, paddingBottom: 10 },
+    abaAtiva: { borderBottomWidth: 2, borderBottomColor: '#3b82f6' },
+    textoAba: { color: '#9ba4b4', fontSize: 12, fontWeight: '500', textAlign: 'center' },
+    textoAbaAtivo: { color: '#3b82f6' },
+
+
+    categoria: { marginBottom: 10 },
+    cabecalhoCategoria: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#1c212d', borderWidth: 1, borderColor: '#242b3d', borderRadius: 12, padding: 14 },
+    tituloCategoria: { color: '#e2e8f0', fontSize: 13, fontWeight: '500' },
+    tituloCategoriaAberta: { color: '#818cf8' },
+    contagem: { color: '#64748b', fontSize: 10, marginTop: 2 },
+    seta: { color: '#64748b', fontSize: 12 },
+    setaAberta: { color: '#818cf8' },
+    lista: { marginTop: 6, paddingHorizontal: 2, gap: 8 },
+    vazio: { color: '#64748b', fontSize: 11, textAlign: 'center', paddingVertical: 8 },
+
+    registro: { backgroundColor: '#1e2433', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(36, 43, 61, 0.6)', padding: 14, marginTop: 2 },
+    linha: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+    nomeArea: { flex: 1, paddingRight: 8 },
+    nome: { color: '#f1f5f9', fontSize: 13, fontWeight: '600' },
+    descricao: { color: '#94a3b8', fontSize: 11, marginTop: 2 },
+    valor: { fontSize: 13, fontWeight: '700' },
+    detalhe: { color: '#64748b', fontSize: 11, marginTop: 4 },
+
+
+    rodapeRegistro: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 8, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.04)' },
+    status: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1 },
+    statusPendente: { backgroundColor: 'rgba(255, 91, 127, 0.1)', borderColor: 'rgba(255, 91, 127, 0.2)' },
+    statusPago: { backgroundColor: 'rgba(46, 212, 122, 0.1)', borderColor: 'rgba(46, 212, 122, 0.2)' },
+    textoStatus: { fontSize: 10, fontWeight: '500' },
+    textoPendente: { color: '#FF5B7F' },
+    textoPago: { color: '#2ED47A' },
+
+    acoes: { flexDirection: 'row', gap: 6 },
+    botaoEditar: { backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 1, borderColor: 'rgba(59, 130, 246, 0.3)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+    textoEditar: { color: '#60a5fa', fontSize: 10, fontWeight: '500' },
+    botaoExcluir: { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.3)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+    textoExcluir: { color: '#f87171', fontSize: 10, fontWeight: '500' },
+    botaoConcluir: { backgroundColor: '#242b3d', borderRadius: 8, paddingVertical: 8, alignItems: 'center', marginTop: 10 },
+    botaoReceber: { backgroundColor: '#1b2c26', borderWidth: 1, borderColor: 'rgba(46, 212, 122, 0.2)' },
+    textoConcluir: { color: '#e2e8f0', fontSize: 11, fontWeight: '500' },
+
+    carregando: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+    textoCarregando: { color: '#94a3b8', marginTop: 8, fontSize: 12 },
+    rodape: { color: '#475569', textAlign: 'center', fontSize: 10, marginTop: 20, marginBottom: 10 },
+
+
+    fundoModal: { flex: 1, backgroundColor: 'rgba(5, 5, 8, 0.85)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+    modal: { backgroundColor: '#161a23', borderRadius: 16, borderWidth: 1, borderColor: '#242b3d', padding: 20, width: '100%', maxWidth: 320 },
+    tituloModal: { color: '#ffffff', fontSize: 16, fontWeight: '600', marginBottom: 4 },
+    subtituloModal: { color: '#94a3b8', fontSize: 12, marginBottom: 16 },
+    inputData: { backgroundColor: '#0d0f14', borderWidth: 1, borderColor: '#242b3d', borderRadius: 8, padding: 12, color: '#ffffff', fontSize: 14, marginBottom: 16 },
+    botoesModal: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10 },
+    botaoCancelar: { paddingHorizontal: 14, paddingVertical: 8 },
+    textoCancelar: { color: '#94a3b8', fontSize: 13 },
+    botaoConfirmar: { backgroundColor: '#3b82f6', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
+    textoConfirmar: { color: '#ffffff', fontSize: 13, fontWeight: '600' },
+
+    tabBarInferior: { backgroundColor: '#161a23', borderWidth: 1, borderColor: '#242b3d', borderRadius: 16, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', height: 56, marginBottom: 12, marginTop: 10 },
+    iconBar: { padding: 8 },
+    iconBarAtivo: { backgroundColor: '#4d5bf7', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6 },
+    txtIconBar: { fontSize: 18, opacity: 0.6 },
+    txtIconBarAtivo: { fontSize: 18 }
 });

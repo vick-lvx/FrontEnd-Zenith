@@ -10,7 +10,7 @@ const ResetSenha = ({ navigation }) => {
     const [CODIGO, setCodigo] = useState('');
     const [NOVASENHA, setNovaSenha] = useState('');
     const [CONFIRMARSENHA, setConfirmarSenha] = useState('');
-    const length = 4;
+    const length = 6;
     const inputsRef = useRef([]);
     const handleBoxChange = (text, index) => {
 

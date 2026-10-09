@@ -15,11 +15,12 @@ import CadastroInvestimentos from './Src/Screens/CadastroInvestimentos';
 import CadastroReservaEmergencia from './Src/Screens/CadastroReservaEmergencia';
 import { createAsyncStorage } from "@react-native-async-storage/async-storage";
 import Home from './Src/Screens/Home';
-
+Stack = createNativeStackNavigator()
 export default function Navigation() {
 
   const [token, setToken] = useState(null);
   const [usuario, setUsuario] = useState(null);
+
   useEffect(() => {
     async function buscaDados() {
       try {
@@ -36,6 +37,7 @@ export default function Navigation() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+      
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="VerificacaoEmail" component={VerificacaoEmail} />
         <Stack.Screen name="Cadastro" component={Cadastro} />
