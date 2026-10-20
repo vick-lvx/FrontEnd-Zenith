@@ -41,6 +41,8 @@ export default function Login({ navigation }) {
 
             const resposta = await axios.post('http://10.0.2.2:3001/login', { CPF: CPF, SENHA: SENHA });
 
+            console.log(resposta)
+
             const idUsuario = resposta.data.idUsuario;
             const acessToken = resposta.data.acessToken;
             const nomeUsuario = resposta.data.nomeUsuario || resposta.data.nome || 'Usuário';
