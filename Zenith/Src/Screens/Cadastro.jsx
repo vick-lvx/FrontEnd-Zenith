@@ -152,7 +152,7 @@ const Cadastro = ({ navigation }) => {
 
         }
     };
-
+    // Renderiza a barra visual superior que mostra o progresso das etapas (1, 2 e 3)
     const IndicadorEtapas = () => {
 
         return (

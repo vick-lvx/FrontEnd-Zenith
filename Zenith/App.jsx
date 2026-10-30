@@ -13,6 +13,12 @@ import CadastroGanhosFixos from './Src/Screens/CadastroGanhosFixos';
 import CadastroGanhosVariaveis from './Src/Screens/CadastroGanhosVariaveis';
 import CadastroInvestimentos from './Src/Screens/CadastroInvestimentos';
 import CadastroReservaEmergencia from './Src/Screens/CadastroReservaEmergencia';
+import AtualizarGanhosFixos from './Src/Screens/AtualizarGanhosFixos';
+import AtualizarGanhosVariados from './Src/Screens/AtualizarGanhosVariados'
+import AtualizarGastosFixos from './Src/Screens/AtualizarGastosFixos';
+import AtualizarGastosVariados from './Src/Screens/AtualizarGastosVariados';
+import AtualizarInvestimentos from './Src/Screens/AtualizarInvestimentos';
+import AtualizarReservaEmergencia from './Src/Screens/AtualizarReservaEmergencia';
 import { createAsyncStorage } from "@react-native-async-storage/async-storage";
 import Home from './Src/Screens/Home';
 Stack = createNativeStackNavigator()
@@ -48,6 +54,13 @@ export default function Navigation() {
         <Stack.Screen name="CadastroInvestimentos" component={CadastroInvestimentos} />
         <Stack.Screen name="CadastroReservaEmergencia" component={CadastroReservaEmergencia} />
         <Stack.Screen name="CadastroGastosFixosV" component={CadastroGastosFixosV} />
+        <Stack.Screen name="AtualizarGastosVariados" component={AtualizarGastosVariados} />
+        <Stack.Screen name="AtualizarGastosFixos" component={AtualizarGastosFixos} />
+        <Stack.Screen name="AtualizarGanhosVariados" component={AtualizarGanhosVariados} />
+        <Stack.Screen name="AtualizarGanhosFixos" component={AtualizarGanhosFixos} />
+        <Stack.Screen name="AtualizarInvestimentos" component={AtualizarInvestimentos} />
+        <Stack.Screen name="AtualizarReservaEmergencia" component={AtualizarReservaEmergencia} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

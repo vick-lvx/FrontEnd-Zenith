@@ -33,15 +33,15 @@ const TELAS_EDICAO = {
     'gasto-variado': 'AtualizarGastosVariaveis',
     'ganho-fixo': 'AtualizarGanhosFixos',
     'ganho-variado': 'AtualizarGanhosVariados',
-    investimento: 'AtualizarInvestimentos',
-    reserva: 'AtualizarReservaEmergencia'
+    'investimento': 'AtualizarInvestimentos',
+    'reserva': 'AtualizarReservaEmergencia'
 };
 
 
 const ROTAS_EXCLUSAO = {
     'gasto-fixo': '/api/deletar-gastos/',
     'gasto-variado': '/api/deletar-gastos/',
-    parcela: '/api/deletar-parcelas/',
+    'parcela': '/api/deletar-parcelas/',
     'ganho-fixo': '/api/deletar-ganhos/',
     'ganho-variado': '/api/deletar-ganhos/',
     investimento: '/api/deletar-investimentos/',
@@ -490,84 +490,385 @@ const styles = StyleSheet.create({
         fontWeight: '700' 
     },
     subtitulo: { 
-        color: '#9ba4b4', fontSize: 12, marginTop: 2 },
-    atualizar: { padding: 6 },
-    iconeAtualizar: { color: '#9ba4b4', fontSize: 22 },
+        color: '#9ba4b4', 
+        fontSize: 12, 
+        marginTop: 2 
+    },
+    atualizar: { 
+        padding: 6 
+    },
+    iconeAtualizar: { 
+        color: '#9ba4b4', 
+        fontSize: 22 
+    },
 
     
-    containerCentral: { flex: 1, backgroundColor: '#161a23', borderRadius: 20, borderWidth: 1, borderColor: '#242b3d', padding: 16 },
-    rowCentralHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-    tituloCentral: { fontSize: 16, fontWeight: '600', color: '#ffffff' },
-    botoesCadastroArea: { flexDirection: 'row', gap: 6 },
+    containerCentral: { 
+        flex: 1,
+        backgroundColor: '#161a23', 
+        borderRadius: 20, 
+        borderWidth: 1, 
+        borderColor: '#242b3d', 
+        padding: 16 
+    },
+    rowCentralHeader: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: 16 
+    },
+    tituloCentral: { 
+        fontSize: 16, 
+        fontWeight: '600', 
+        color: '#ffffff' 
+    },
+    botoesCadastroArea: { 
+        flexDirection: 'row', 
+        gap: 6 
+    },
+    btnCadastroBlue: { 
+    backgroundColor: '#242b3d', 
+    borderWidth: 1, 
+    borderColor: 'rgba(59, 130, 246, 0.2)', 
+    paddingHorizontal: 10, 
+    paddingVertical: 6, 
+    borderRadius: 8 
+},
+    txtCadastroBlue: {
+    color: '#60a5fa', 
+    fontSize: 10, 
+    fontWeight: '600' 
+},
+    btnCadastroPurple: { 
+        backgroundColor: '#211933', 
+        borderWidth: 1, 
+        borderColor: 'rgba(139, 92, 246, 0.2)', 
+        paddingHorizontal: 10, 
+        paddingVertical: 6, 
+        borderRadius: 8 },
+    txtCadastroPurple: { 
+        color: '#a78bfa', 
+        fontSize: 10, 
+        fontWeight: '600' 
+    },
+    abas: { 
+        flexDirection: 'row', 
+        borderBottomWidth: 1, 
+        borderBottomColor: '#242b3d', 
+        marginBottom: 16 
+    },
+    aba: { 
+        flex: 1, 
+        paddingBottom: 10 
+    },
+    abaAtiva: { 
+        borderBottomWidth: 2, 
+        borderBottomColor: '#3b82f6' 
+    },
+    textoAba: {
+         color: '#9ba4b4', 
+         fontSize: 12, 
+         fontWeight: '500', 
+         textAlign: 'center' 
+        },
+    textoAbaAtivo: { 
+        color: '#3b82f6' 
+    },
+    categoria: { 
+        marginBottom: 10 
+    },
+    cabecalhoCategoria: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        justifyContent: 'space-between', 
+        backgroundColor: '#1c212d', 
+        borderWidth: 1, 
+        borderColor: '#242b3d', 
+        borderRadius: 12, 
+        padding: 14 
+    },
+    tituloCategoria: { 
+        color: '#e2e8f0', 
+        fontSize: 13, 
+        fontWeight: '500' 
+    },
+    tituloCategoriaAberta: { 
+        color: '#818cf8' 
+    },
+    contagem: { 
+        color: '#64748b', 
+        fontSize: 10, 
+        marginTop: 2 
+    },
+    seta: { 
+        color: '#64748b', 
+        fontSize: 12 
+    },
+    setaAberta: { 
+        color: '#818cf8' 
+    },
+    lista: { 
+        marginTop: 6, 
+        paddingHorizontal: 2,
+        gap: 8 },
+    vazio: { 
+        color: '#64748b', 
+        fontSize: 11, 
+        textAlign: 'center', 
+        paddingVertical: 8 
+    },
 
-   
-    btnCadastroBlue: { backgroundColor: '#242b3d', borderWidth: 1, borderColor: 'rgba(59, 130, 246, 0.2)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
-    txtCadastroBlue: { color: '#60a5fa', fontSize: 10, fontWeight: '600' },
-    btnCadastroPurple: { backgroundColor: '#211933', borderWidth: 1, borderColor: 'rgba(139, 92, 246, 0.2)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
-    txtCadastroPurple: { color: '#a78bfa', fontSize: 10, fontWeight: '600' },
+    registro: { 
+        backgroundColor: '#1e2433', 
+        borderRadius: 12, 
+        borderWidth: 1, 
+        borderColor: 'rgba(36, 43, 61, 0.6)', 
+        padding: 14, 
+        marginTop: 2 },
+    linha: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'flex-start' 
+    },
+    nomeArea: { 
+        flex: 1, 
+        paddingRight: 8 
+    },
+    nome: { 
+        color: '#f1f5f9', 
+        fontSize: 13, 
+        fontWeight: '600' },
+    descricao: { 
+        color: '#94a3b8', 
+        fontSize: 11, 
+        marginTop: 2 
+    },
+    valor: { 
+        fontSize: 13, 
+        fontWeight: '700' 
+    },
+       detalhe: { 
+        color: '#64748b', 
+        fontSize: 11, 
+        marginTop: 4 
+    },
 
-    abas: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#242b3d', marginBottom: 16 },
-    aba: { flex: 1, paddingBottom: 10 },
-    abaAtiva: { borderBottomWidth: 2, borderBottomColor: '#3b82f6' },
-    textoAba: { color: '#9ba4b4', fontSize: 12, fontWeight: '500', textAlign: 'center' },
-    textoAbaAtivo: { color: '#3b82f6' },
+    rodapeRegistro: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        justifyContent: 'space-between', 
+        marginTop: 12, 
+        paddingTop: 8, 
+        borderTopWidth: 1, 
+        borderTopColor: 'rgba(255,255,255,0.04)' 
+    },
+    
+    status: { 
+        borderRadius: 6, 
+        paddingHorizontal: 8, 
+        paddingVertical: 4, 
+        borderWidth: 1 
+    },
+    
+    statusPendente: { 
+        backgroundColor: 'rgba(255, 91, 127, 0.1)', 
+        borderColor: 'rgba(255, 91, 127, 0.2)' 
+    },
+    
+    statusPago: { 
+        backgroundColor: 'rgba(46, 212, 122, 0.1)', 
+        borderColor: 'rgba(46, 212, 122, 0.2)' 
+    },
+    
+    textoStatus: { 
+        fontSize: 10, 
+        fontWeight: '500' 
+    },
+    
+    textoPendente: { 
+        color: '#FF5B7F' 
+    },
+    
+    textoPago: { 
+        color: '#2ED47A' 
+    },
 
+    acoes: { 
+        flexDirection: 'row', 
+        gap: 6 
+    },
+    
+    botaoEditar: { 
+        backgroundColor: 'rgba(59, 130, 246, 0.1)', 
+        borderWidth: 1, 
+        borderColor: 'rgba(59, 130, 246, 0.3)', 
+        paddingHorizontal: 10, 
+        paddingVertical: 4, 
+        borderRadius: 6 
+    },
+    
+    textoEditar: { 
+        color: '#60a5fa', 
+        fontSize: 10, 
+        fontWeight: '500' 
+    },
+    
+    botaoExcluir: { 
+        backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+        borderWidth: 1, 
+        borderColor: 'rgba(239, 68, 68, 0.3)', 
+        paddingHorizontal: 10, 
+        paddingVertical: 4, 
+        borderRadius: 6 
+    },
+    
+    textoExcluir: { 
+        color: '#f87171', 
+        fontSize: 10, 
+        fontWeight: '500' 
+    },
+    
+    botaoConcluir: { 
+        backgroundColor: '#242b3d', 
+        borderRadius: 8, 
+        paddingVertical: 8, 
+        alignItems: 'center', 
+        marginTop: 10 
+    },
+    
+    botaoReceber: { 
+        backgroundColor: '#1b2c26', 
+        borderWidth: 1, 
+        borderColor: 'rgba(46, 212, 122, 0.2)' 
+    },
+    
+    textoConcluir: { 
+        color: '#e2e8f0', 
+        fontSize: 11, 
+        fontWeight: '500' 
+    },
 
-    categoria: { marginBottom: 10 },
-    cabecalhoCategoria: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#1c212d', borderWidth: 1, borderColor: '#242b3d', borderRadius: 12, padding: 14 },
-    tituloCategoria: { color: '#e2e8f0', fontSize: 13, fontWeight: '500' },
-    tituloCategoriaAberta: { color: '#818cf8' },
-    contagem: { color: '#64748b', fontSize: 10, marginTop: 2 },
-    seta: { color: '#64748b', fontSize: 12 },
-    setaAberta: { color: '#818cf8' },
-    lista: { marginTop: 6, paddingHorizontal: 2, gap: 8 },
-    vazio: { color: '#64748b', fontSize: 11, textAlign: 'center', paddingVertical: 8 },
+    carregando: { 
+        flex: 1, 
+        alignItems: 'center', 
+        justifyContent: 'center' 
+    },
+    
+    textoCarregando: { 
+        color: '#94a3b8', 
+        marginTop: 8, 
+        fontSize: 12 
+    },
+    
+    rodape: { 
+        color: '#475569', 
+        textAlign: 'center', 
+        fontSize: 10, 
+        marginTop: 20, 
+        marginBottom: 10 
+    },
 
-    registro: { backgroundColor: '#1e2433', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(36, 43, 61, 0.6)', padding: 14, marginTop: 2 },
-    linha: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-    nomeArea: { flex: 1, paddingRight: 8 },
-    nome: { color: '#f1f5f9', fontSize: 13, fontWeight: '600' },
-    descricao: { color: '#94a3b8', fontSize: 11, marginTop: 2 },
-    valor: { fontSize: 13, fontWeight: '700' },
-    detalhe: { color: '#64748b', fontSize: 11, marginTop: 4 },
+    fundoModal: { 
+        flex: 1, 
+        backgroundColor: 'rgba(5, 5, 8, 0.85)', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        padding: 20 
+    },
+    
+    modal: { 
+        backgroundColor: '#161a23', 
+        borderRadius: 16, 
+        borderWidth: 1, 
+        borderColor: '#242b3d', 
+        padding: 20, 
+        width: '100%', 
+        maxWidth: 320 
+    },
+    
+    tituloModal: { 
+        color: '#ffffff', 
+        fontSize: 16, 
+        fontWeight: '600', 
+        marginBottom: 4 
+    },
+    
+    subtituloModal: { 
+        color: '#94a3b8', 
+        fontSize: 12, 
+        marginBottom: 16 
+    },
+    
+    inputData: { 
+        backgroundColor: '#0d0f14', 
+        borderWidth: 1, 
+        borderColor: '#242b3d', 
+        borderRadius: 8, 
+        padding: 12, 
+        color: '#ffffff', 
+        fontSize: 14, 
+        marginBottom: 16 
+    },
+    
+    botoesModal: { 
+        flexDirection: 'row', 
+        justifyContent: 'flex-end', 
+        gap: 10 
+    },
+    
+    botaoCancelar: { 
+        paddingHorizontal: 14, 
+        paddingVertical: 8 
+    },
+    
+    textoCancelar: { 
+        color: '#94a3b8', 
+        fontSize: 13 
+    },
+    
+    botaoConfirmar: { 
+        backgroundColor: '#3b82f6', 
+        paddingHorizontal: 16, 
+        paddingVertical: 8, 
+        borderRadius: 8 
+    },
+    
+    textoConfirmar: { 
+        color: '#ffffff', 
+        fontSize: 13, 
+        fontWeight: '600' 
+    },
 
-
-    rodapeRegistro: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 8, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.04)' },
-    status: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1 },
-    statusPendente: { backgroundColor: 'rgba(255, 91, 127, 0.1)', borderColor: 'rgba(255, 91, 127, 0.2)' },
-    statusPago: { backgroundColor: 'rgba(46, 212, 122, 0.1)', borderColor: 'rgba(46, 212, 122, 0.2)' },
-    textoStatus: { fontSize: 10, fontWeight: '500' },
-    textoPendente: { color: '#FF5B7F' },
-    textoPago: { color: '#2ED47A' },
-
-    acoes: { flexDirection: 'row', gap: 6 },
-    botaoEditar: { backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 1, borderColor: 'rgba(59, 130, 246, 0.3)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
-    textoEditar: { color: '#60a5fa', fontSize: 10, fontWeight: '500' },
-    botaoExcluir: { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.3)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
-    textoExcluir: { color: '#f87171', fontSize: 10, fontWeight: '500' },
-    botaoConcluir: { backgroundColor: '#242b3d', borderRadius: 8, paddingVertical: 8, alignItems: 'center', marginTop: 10 },
-    botaoReceber: { backgroundColor: '#1b2c26', borderWidth: 1, borderColor: 'rgba(46, 212, 122, 0.2)' },
-    textoConcluir: { color: '#e2e8f0', fontSize: 11, fontWeight: '500' },
-
-    carregando: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-    textoCarregando: { color: '#94a3b8', marginTop: 8, fontSize: 12 },
-    rodape: { color: '#475569', textAlign: 'center', fontSize: 10, marginTop: 20, marginBottom: 10 },
-
-
-    fundoModal: { flex: 1, backgroundColor: 'rgba(5, 5, 8, 0.85)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-    modal: { backgroundColor: '#161a23', borderRadius: 16, borderWidth: 1, borderColor: '#242b3d', padding: 20, width: '100%', maxWidth: 320 },
-    tituloModal: { color: '#ffffff', fontSize: 16, fontWeight: '600', marginBottom: 4 },
-    subtituloModal: { color: '#94a3b8', fontSize: 12, marginBottom: 16 },
-    inputData: { backgroundColor: '#0d0f14', borderWidth: 1, borderColor: '#242b3d', borderRadius: 8, padding: 12, color: '#ffffff', fontSize: 14, marginBottom: 16 },
-    botoesModal: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10 },
-    botaoCancelar: { paddingHorizontal: 14, paddingVertical: 8 },
-    textoCancelar: { color: '#94a3b8', fontSize: 13 },
-    botaoConfirmar: { backgroundColor: '#3b82f6', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
-    textoConfirmar: { color: '#ffffff', fontSize: 13, fontWeight: '600' },
-
-    tabBarInferior: { backgroundColor: '#161a23', borderWidth: 1, borderColor: '#242b3d', borderRadius: 16, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', height: 56, marginBottom: 12, marginTop: 10 },
-    iconBar: { padding: 8 },
-    iconBarAtivo: { backgroundColor: '#4d5bf7', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6 },
-    txtIconBar: { fontSize: 18, opacity: 0.6 },
-    txtIconBarAtivo: { fontSize: 18 }
+    tabBarInferior: { 
+        backgroundColor: '#161a23', 
+        borderWidth: 1, 
+        borderColor: '#242b3d', 
+        borderRadius: 16, 
+        flexDirection: 'row', 
+        justifyContent: 'space-around', 
+        alignItems: 'center', 
+        height: 56, 
+        marginBottom: 12, 
+        marginTop: 10 
+    },
+    
+    iconBar: { 
+        padding: 8 
+    },
+    
+    iconBarAtivo: { 
+        backgroundColor: '#4d5bf7', 
+        borderRadius: 10, 
+        paddingHorizontal: 12, 
+        paddingVertical: 6 
+    },
+    
+    txtIconBar: { 
+        fontSize: 18, 
+        opacity: 0.6 
+    },
+    
+    txtIconBarAtivo: { 
+        fontSize: 18 
+    }
 });
