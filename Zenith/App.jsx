@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import Login from './Src/Screens/Login';
 import VerificacaoEmail from './Src/Screens/ResetSenha';
 import Cadastro from './Src/Screens/Cadastro';
+import Home from './Src/Screens/Home';
 import Route from './Src/Routes/Route';
 import CadastroGastosVariaveis from './Src/Screens/CadastroGastosVariaveis';
 import CadastroGastosFixosV from './Src/Screens/CadastroGastosFixosV';
@@ -20,7 +21,6 @@ import AtualizarGastosVariados from './Src/Screens/AtualizarGastosVariados';
 import AtualizarInvestimentos from './Src/Screens/AtualizarInvestimentos';
 import AtualizarReservaEmergencia from './Src/Screens/AtualizarReservaEmergencia';
 import { createAsyncStorage } from "@react-native-async-storage/async-storage";
-import Home from './Src/Screens/Home';
 Stack = createNativeStackNavigator()
 export default function Navigation() {
 
@@ -42,11 +42,12 @@ export default function Navigation() {
   }, []);
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
       
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="VerificacaoEmail" component={VerificacaoEmail} />
         <Stack.Screen name="Cadastro" component={Cadastro} />
+        <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Route" component={Route} />
         <Stack.Screen name="CadastroGastosVariaveis" component={CadastroGastosVariaveis} />
         <Stack.Screen name="CadastroGanhosFixos" component={CadastroGanhosFixos} />
